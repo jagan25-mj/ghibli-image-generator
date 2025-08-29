@@ -1,66 +1,54 @@
+<!-- ghibgen/templates/index.html -->
 {% extends "base.html" %}
 {% block title %}Create · Ghibli Image Generator{% endblock %}
 
 {% block content %}
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-
   <!-- LEFT: FORM -->
   <section class="glass md:col-span-2 p-6">
     <h2 class="font-semibold text-lg mb-4">Create Image</h2>
-
-    <!-- Single form, correct enctype for file upload -->
     <form method="post" enctype="multipart/form-data" class="space-y-6">
       {% csrf_token %}
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-  <div class="card">
-    <label class="block text-sm font-semibold mb-2">Preset</label>
-    <select name="preset" class="field select">
-      <option value="balanced" selected>Balanced</option>
-      <option value="speed">Speed</option>
-      <option value="quality">Quality</option>
-      <option value="faithful">Faithful (img→img)</option>
-      <option value="stylized">Stylized (img→img)</option>
-    </select>
-    <p class="help">Pick once; you can still override guidance/steps/strength below.</p>
-  </div>
-</div>
+        <div class="card">
+          <label class="block text-sm font-semibold mb-2">Preset</label>
+          <select name="preset" class="field select">
+            <option value="balanced" {% if form.data.preset == "balanced" %}selected{% endif %}>Balanced</option>
+            <option value="speed" {% if form.data.preset == "speed" %}selected{% endif %}>Speed</option>
+            <option value="quality" {% if form.data.preset == "quality" %}selected{% endif %}>Quality</option>
+            <option value="faithful" {% if form.data.preset == "faithful" %}selected{% endif %}>Faithful (img→img)</option>
+            <option value="stylized" {% if form.data.preset == "stylized" %}selected{% endif %}>Stylized (img→img)</option>
+          </select>
+          <p class="help text-xs text-slate-400 mt-1">Pick once; you can still override guidance/steps/strength below.</p>
+        </div>
+      </div>
 
-
-      <!-- Prompt -->
       <div class="card">
         <label class="block text-sm font-semibold mb-2">Prompt</label>
         <input name="prompt" class="field" placeholder="A cozy village at dusk with lanterns..." required />
-        <p class="help">Describe the scene you want. Works for both text-to-image and image-to-image.</p>
       </div>
 
-      <!-- Img2Img: Upload -->
       <div class="card">
         <label class="block text-sm font-semibold mb-2">Initial image (optional)</label>
         <input type="file" name="init_image" accept="image/*" class="field" />
-        <p class="help">Upload an image to transform. Leave empty to generate from scratch.</p>
       </div>
 
-      <!-- Strength / Guidance / Steps -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
         <div class="card">
           <label class="block text-sm font-semibold mb-2">Strength (img2img)</label>
           <input type="number" step="0.05" min="0.05" max="1.0" name="strength" value="0.6" class="field" />
-          <p class="help">Lower = keep more of the original. Higher = follow prompt more.</p>
         </div>
         <div class="card">
           <label class="block text-sm font-semibold mb-2">Guidance</label>
           <input type="number" step="0.1" min="1" max="20" name="guidance_scale" value="7.5" class="field" />
-          <p class="help">Higher = more literal to the prompt (7–9 is a sweet spot).</p>
         </div>
         <div class="card">
           <label class="block text-sm font-semibold mb-2">Steps</label>
           <input type="number" min="6" max="60" name="num_inference_steps" value="18" class="field" />
-          <p class="help">18–28 works well with the chosen samplers.</p>
         </div>
       </div>
 
-      <!-- Aspect (text2img only) + Seed -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div class="card">
           <label class="block text-sm font-semibold mb-2">Aspect (text-to-image)</label>
@@ -70,16 +58,13 @@
             <option value="16:9">Wide (16:9)</option>
             <option value="4:5">Portrait (4:5)</option>
           </select>
-          <p class="help">Sizes are snapped so width/height are divisible by 8.</p>
         </div>
         <div class="card">
           <label class="block text-sm font-semibold mb-2">Seed</label>
           <input name="seed" class="field" placeholder="(optional)" />
-          <p class="help">Set a number to make results repeatable; leave blank for random.</p>
         </div>
       </div>
 
-      <!-- Negative + LoRA -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div class="card">
           <label class="block text-sm font-semibold mb-2">Negative prompt</label>
@@ -91,7 +76,6 @@
         </div>
       </div>
 
-      <!-- Upscale -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
         <div class="card">
           <label class="block text-sm font-semibold mb-2">Upscale mode</label>
@@ -111,20 +95,17 @@
         </div>
         <div class="card">
           <label class="block text-sm font-semibold mb-2">—</label>
-          <p class="help">2× is a great speed/quality trade-off; 4× is heavier.</p>
+          <p class="help text-xs text-slate-400">2× is a great speed/quality trade-off.</p>
         </div>
       </div>
 
-      <!-- Actions -->
       <div class="flex items-center gap-3">
         <button class="btn" type="submit">Generate</button>
         <a href="{% url 'ghibgen:index' %}" class="btn secondary">Clear</a>
       </div>
 
       {% if error %}
-        <div class="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-          {{ error }}
-        </div>
+        <div class="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">{{ error }}</div>
       {% endif %}
     </form>
   </section>
@@ -144,8 +125,17 @@
         <a href="{{ img_url }}" class="btn secondary" download>Download</a>
         <a href="{{ img_url }}" class="btn secondary" target="_blank" rel="noopener">Open</a>
       </div>
+
+      {% if used %}
+      <div class="mt-4 text-xs text-slate-300 space-y-1">
+        <div class="font-semibold text-slate-200">Parameters used</div>
+        <div>Mode: {{ used.mode }} · Preset: {{ used.preset }} · Seed: <span class="font-mono">{{ used.seed }}</span></div>
+        <div>Guidance: {{ used.guidance }} · Steps: {{ used.steps }}</div>
+        <div>Aspect: {{ used.aspect }} · Upscale: {{ used.upscale_mode }} ×{{ used.upscale_factor }}</div>
+        <div>LoRA: {{ used.lora }}</div>
+      </div>
+      {% endif %}
     {% endif %}
   </aside>
-
 </div>
 {% endblock %}

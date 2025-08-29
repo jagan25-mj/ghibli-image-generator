@@ -1,4 +1,5 @@
-import os, time, random
+# ghibgen/utils.py
+import time, random
 from pathlib import Path
 from django.conf import settings
 
