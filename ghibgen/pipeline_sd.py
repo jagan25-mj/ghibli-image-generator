@@ -158,7 +158,7 @@ def upscale_realesrgan(img: Image.Image, scale: int = 2) -> Image.Image:
     return upscale_lanczos(img, scale=scale)
 
 # ---------- Pipeline loaders ----------
-def _load_pipe(speed_mode: bool = True) -> StableDiffusionPipeline:
+def _load_pipe(speed_mode: bool = True) -> StableDiffusionPipeline: #type: ignore[return]
     """
     Build (and memoize) SD1.5 text-to-image.
     Safety can be disabled for local dev with GHIBGEN_DISABLE_SAFETY=1
@@ -173,6 +173,12 @@ def _load_pipe(speed_mode: bool = True) -> StableDiffusionPipeline:
         BASE_MODEL,
         torch_dtype=dtype,
     )
+def generate_hires(prompt, **kwargs):
+    lowres = generate(prompt=prompt, steps=20, aspect="3:2", upscale_mode="off", **kwargs)
+    upscaled = upscale_realesrgan(lowres, scale=2)
+    refined = generate_img2img(prompt=prompt, init_image=upscaled, strength=0.35, steps=25, **kwargs)
+    return refined
+    
 
     # Optional dev-only safety disable (do NOT disable for public apps)
     if os.getenv("GHIBGEN_DISABLE_SAFETY", "0") == "1":
@@ -275,9 +281,9 @@ def generate(
 ) -> Image.Image:
     base_sizes: Dict[str, Tuple[int, int]] = {
         "1:1":  (512, 512),
-        "3:2":  (768, 512),
-        "16:9": (896, 504),
-        "4:5":  (512, 640),
+        "3:2": (1024, 682),
+        "16:9": (1280, 720),
+        "4:5": (640, 800),
     }
     width, height = base_sizes.get(aspect, (512, 512))
 
