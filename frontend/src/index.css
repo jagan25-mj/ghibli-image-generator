@@ -17,11 +17,12 @@
 
 @layer base {
   * {
-    @apply border-border;
+    box-sizing: border-box;
   }
   
   body {
-    @apply min-h-screen text-text antialiased;
+    @apply min-h-screen antialiased;
+    color: var(--text);
     background: radial-gradient(1000px 1000px at 10% -10%, rgba(59, 130, 246, 0.08), transparent 40%),
                 radial-gradient(1200px 1200px at 100% 10%, rgba(139, 92, 246, 0.08), transparent 40%),
                 linear-gradient(180deg, #0a0d12 0%, #0b0e13 100%);
@@ -32,13 +33,16 @@
 
 @layer components {
   .glass {
-    @apply bg-panel border border-stroke rounded-2xl overflow-hidden;
+    @apply rounded-2xl overflow-hidden;
+    background: var(--panel);
+    border: 1px solid var(--stroke);
     backdrop-filter: blur(18px) saturate(140%);
     box-shadow: 0 28px 80px -24px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.05);
   }
   
   .glass-header {
-    @apply flex items-center justify-between px-4 py-3 border-b border-stroke;
+    @apply flex items-center justify-between px-4 py-3;
+    border-bottom: 1px solid var(--stroke);
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 70%);
   }
   
@@ -53,13 +57,15 @@
   }
   
   .field {
-    @apply w-full rounded-xl px-4 py-3 border border-stroke transition-all duration-250;
+    @apply w-full rounded-xl px-4 py-3 transition-all;
+    border: 1px solid var(--stroke);
+    transition-duration: 250ms;
     background: rgba(14, 17, 24, 0.75);
     color: var(--text);
   }
   
   .field::placeholder {
-    @apply text-muted;
+    color: var(--muted);
   }
   
   .field:focus {
@@ -116,7 +122,8 @@ html {
 
 /* Focus visible for accessibility */
 :focus-visible {
-  @apply outline-none ring-2 ring-purple-500 ring-offset-2 ring-offset-bg;
+  @apply outline-none ring-2 ring-purple-500 ring-offset-2;
+  ring-offset-color: var(--bg);
 }
 
 /* Custom scrollbar */
